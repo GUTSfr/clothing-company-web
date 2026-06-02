@@ -1,0 +1,22 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          sudo cp /var/www/html/index.html /var/www/html/index_backup.html
+          echo '<h1>Updated by CI/CD Pipeline</h1>' | sudo tee /var/www/html/index.html
+          sudo systemctl restart nginx
