@@ -1,15 +1,22 @@
 name: Deploy to AWS
-
 on:
   push:
     branches: [ main ]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
+    - name: Copy index.html to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        source: "index.html"
+        target: "/tmp/"
+
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -18,5 +25,6 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: 22
         script: |
+          sudo cp /tmp/index.html /var/www/html/index.html
           sudo systemctl restart nginx
           echo "Deployed successfully!"
